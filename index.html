@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VerticalFrame Studio — 1080×1920 Shorts & Reels Framer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-2: #0b1120;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--panel-2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+    .brand-badge {
+      background: var(--accent);
+      color: #0f172a;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+    .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: 0.15s ease;
+    }
+    button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    button.primary {
+      background: var(--accent);
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+    button.primary:hover:not(:disabled) { background: var(--accent-hover); color: #fff; }
+    button.success {
+      background: var(--success);
+      color: #052e16;
+      border-color: var(--success);
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 340px 1fr 360px;
+      gap: 18px;
+      padding: 18px 24px;
+      flex: 1;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .card h2 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.55);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .dropzone:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.08); }
+    .dropzone p { font-size: 0.85rem; color: var(--muted); margin-top: 6px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+    textarea, input[type="text"], select {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    textarea:focus, input:focus, select:focus { outline: none; border-color: var(--accent); }
+    .queue-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+    .queue-item {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .queue-item.active { border-color: var(--accent); background: rgba(56, 189, 248, 0.1); }
+    .queue-meta { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    /* Center Stage */
+    .stage-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: var(--panel-2);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+    canvas#previewCanvas {
+      width: 100%;
+      max-width: 340px;
+      aspect-ratio: 9 / 16;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.55);
+    }
+    .transport {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 340px;
+    }
+    .transport input[type="range"] { flex: 1; }
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 0.78rem;
+    }
+    .spec-pill {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+    .spec-pill span { display: block; color: var(--muted); font-size: 0.7rem; }
+    .code-box {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.74rem;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 170px;
+      overflow-y: auto;
+    }
+    .status-bar {
+      font-size: 0.8rem;
+      color: var(--accent);
+      min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span>VerticalFrame Studio</span>
+      <span class="brand-badge">1080×1920 · 30 FPS</span>
+    </div>
+    <div class="header-actions">
+      <button id="toggleGuidesBtn">Toggle Safe-Zone Guides</button>
+      <button id="frameCheckBtn" disabled>Inspect 1080×1920 Frame (PNG)</button>
+      <button id="exportBtn" class="primary" disabled>Render &lt;name&gt;_final</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- Left Column: Inputs & Queue -->
+    <section class="card">
+      <h2>1. Inputs & Reusable Logo</h2>
+      <div class="dropzone" id="logoDrop">
+        <strong>Upload Transparent PNG Logo</strong>
+        <p id="logoStatus">Provided once · Reused for every video (250px wide)</p>
+        <input type="file" id="logoInput" accept="image/png,image/webp,image/svg+xml" hidden />
+      </div>
+
+      <div class="dropzone" id="videoDrop">
+        <strong>Add Shorts / Reels Videos</strong>
+        <p>Drop one or more MP4 / MOV / WebM files (any aspect ratio)</p>
+        <input type="file" id="videoInput" accept="video/*" multiple hidden />
+      </div>
+
+      <h2>2. Video Queue & Inspection</h2>
+      <div class="queue-list" id="queueList">
+        <div style="color:var(--muted);font-size:0.82rem;">No videos loaded yet.</div>
+      </div>
+    </section>
+
+    <!-- Center Column: 1080x1920 Canvas Preview -->
+    <section class="card">
+      <h2>3. Live 1080×1920 Canvas Preview</h2>
+      <div class="stage-wrap">
+        <canvas id="previewCanvas" width="1080" height="1920"></canvas>
+        <div class="transport">
+          <button id="playPauseBtn" disabled>Play</button>
+          <input type="range" id="seekSlider" min="0" max="100" value="0" step="0.1" disabled />
+          <span id="timeLabel" style="font-size:0.75rem;color:var(--muted);">0.0s</span>
+        </div>
+        <div class="status-bar" id="statusBar">Ready — upload a logo and one or more videos.</div>
+      </div>
+    </section>
+
+    <!-- Right Column: Caption, Framing & FFmpeg -->
+    <section class="card">
+      <h2>4. Hook & Focal Framing</h2>
+      <div class="field">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <label for="hookInput">Hook / Caption (Max 3 lines · Sentence case)</label>
+          <button id="autoHookBtn" style="padding:4px 8px;font-size:0.74rem;" disabled>Generate Hook</button>
+        </div>
+        <textarea id="hookInput" rows="3" placeholder="Leave blank or generate a 6–14 word curiosity hook..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="fontSelect">Caption Font & Base Size</label>
+        <div style="display:flex;gap:8px;">
+          <select id="fontSelect" style="flex:1;">
+            <option value="Inter">Inter Bold</option>
+            <option value="Poppins">Poppins Bold</option>
+            <option value="Helvetica Neue, Helvetica, Arial">Helvetica Bold</option>
+          </select>
+          <select id="fontSizeSelect" style="width:95px;">
+            <option value="64">64px</option>
+            <option value="60" selected>60px</option>
+            <option value="56">56px</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="focalSlider">Vertical Focal Crop Offset (<span id="focalVal">50%</span> — keeps faces/action centered)</label>
+        <input type="range" id="focalSlider" min="0" max="100" value="50" />
+      </div>
+
+      <div class="spec-grid">
+        <div class="spec-pill"><span>Caption Zone</span>y = 0 to 600 (60px margin)</div>
+        <div class="spec-pill"><span>Video Zone</span>y = 600 to 1410 (1080×810)</div>
+        <div class="spec-pill"><span>Logo Zone</span>y = 1490 (250px centered)</div>
+        <div class="spec-pill"><span>Inspected Source</span><strong id="srcMeta">—</strong></div>
+      </div>
+
+      <h2>5. Exact FFmpeg Command</h2>
+      <div class="code-box" id="ffmpegBox">Upload a video to generate its exact FFmpeg command...</div>
+    </section>
+  </main>
+
+  <video id="hiddenVideo" playsinline crossorigin="anonymous" style="display:none;"></video>
+
+  <script>
+    const state = {
+      logoImg: null,
+      logoName: 'logo.png',
+      videos: [],
+      activeIdx: -1,
+      showGuides: false,
+      rendering: false
+    };
+
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const hiddenVideo = document.getElementById('hiddenVideo');
+
+    const hookPatterns = [
+      (topic) => `Watching ${topic} and you realize how much detail goes into every step...`,
+      (topic) => `Nobody talks about this subtle detail in ${topic}...`,
+      (topic) => `POV: you finally see how ${topic} actually works behind the scenes...`,
+      (topic) => `This is why ${topic} looks effortless until you try it yourself...`
+    ];
+
+    function cleanTopicFromFilename(filename) {
+      const base = filename.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ').replace(/\d+/g, '').trim();
+      return base.length > 2 ? base.toLowerCase() : 'this moment';
+    }
+
+    function formatSentenceCase(text) {
+      const trimmed = text.trim();
+      if (!trimmed) return '';
+      return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+    }
+
+    // Dropzone bindings
+    document.getElementById('logoDrop').onclick = () => document.getElementById('logoInput').click();
+    document.getElementById('videoDrop').onclick = () => document.getElementById('videoInput').click();
+
+    document.getElementById('logoInput').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      state.logoName = file.name;
+      const img = new Image();
+      img.onload = () => {
+        state.logoImg = img;
+        document.getElementById('logoStatus').textContent = `Loaded: ${file.name} (${img.naturalWidth}×${img.naturalHeight}px)`;
+        renderCanvasFrame();
+      };
+      img.src = URL.createObjectURL(file);
+    };
+
+    document.getElementById('videoInput').onchange = async (e) => {
+      const files = Array.from(e.target.files || []);
+      for (const file of files) {
+        const url = URL.createObjectURL(file);
+        const meta = await inspectVideoFile(url);
+        const topic = cleanTopicFromFilename(file.name);
+        const defaultHook = hookPatterns[state.videos.length % hookPatterns.length](topic);
+        state.videos.push({
+          file,
+          url,
+          name: file.name,
+          baseName: file.name.replace(/\.[^/.]+$/, ''),
+          ...meta,
+          hook: defaultHook,
+          focalY: 0.5
+        });
+      }
+      renderQueue();
+      if (state.activeIdx === -1 && state.videos.length > 0) {
+        selectVideo(0);
+      }
+    };
+
+    function inspectVideoFile(url) {
+      return new Promise((resolve) => {
+        const v = document.createElement('video');
+        v.preload = 'metadata';
+        v.src = url;
+        v.onloadedmetadata = () => {
+          resolve({
+            width: v.videoWidth || 1080,
+            height: v.videoHeight || 1920,
+            duration: v.duration || 0
+          });
+        };
+      });
+    }
+
+    function renderQueue() {
+      const list = document.getElementById('queueList');
+      list.innerHTML = '';
+      state.videos.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'queue-item' + (idx === state.activeIdx ? ' active' : '');
+        div.innerHTML = `
+          <div>
+            <div style="font-weight:600;font-size:0.84rem;">${item.name}</div>
+            <div class="queue-meta">${item.width}×${item.height} · ${item.duration.toFixed(1)}s</div>
+          </div>
+          <span style="font-size:0.72rem;color:var(--accent);font-weight:700;">#${idx + 1}</span>
+        `;
+        div.onclick = () => selectVideo(idx);
+        list.appendChild(div);
+      });
+    }
+
+    function selectVideo(idx) {
+      state.activeIdx = idx;
+      const item = state.videos[idx];
+      renderQueue();
+      document.getElementById('hookInput').value = item.hook;
+      document.getElementById('focalSlider').value = Math.round(item.focalY * 100);
+      document.getElementById('focalVal').textContent = `${Math.round(item.focalY * 100)}%`;
+      document.getElementById('srcMeta').textContent = `${item.width}×${item.height} · ${item.duration.toFixed(1)}s`;
+
+      hiddenVideo.pause();
+      hiddenVideo.src = item.url;
+      hiddenVideo.onloadeddata = () => {
+        hiddenVideo.currentTime = Math.min(0.2, item.duration / 2);
+        document.getElementById('playPauseBtn').disabled = false;
+        document.getElementById('seekSlider').disabled = false;
+        document.getElementById('seekSlider').max = item.duration;
+        document.getElementById('autoHookBtn').disabled = false;
+        document.getElementById('frameCheckBtn').disabled = false;
+        document.getElementById('exportBtn').disabled = false;
+        updateFFmpegSnippet(item);
+        renderCanvasFrame();
+      };
+    }
+
+    hiddenVideo.onseeked = () => renderCanvasFrame();
+
+    document.getElementById('hookInput').oninput = (e) => {
+      if (state.activeIdx < 0) return;
+      state.videos[state.activeIdx].hook = e.target.value;
+      updateFFmpegSnippet(state.videos[state.activeIdx]);
+      renderCanvasFrame();
+    };
+
+    document.getElementById('autoHookBtn').onclick = () => {
+      if (state.activeIdx < 0) return;
+      const item = state.videos[state.activeIdx];
+      const topic = cleanTopicFromFilename(item.name);
+      const nextPattern = hookPatterns[Math.floor(Math.random() * hookPatterns.length)];
+      item.hook = nextPattern(topic);
+      document.getElementById('hookInput').value = item.hook;
+      updateFFmpegSnippet(item);
+      renderCanvasFrame();
+    };
+
+    document.getElementById('fontSelect').onchange = () => renderCanvasFrame();
+    document.getElementById('fontSizeSelect').onchange = () => renderCanvasFrame();
+
+    document.getElementById('focalSlider').oninput = (e) => {
+      if (state.activeIdx < 0) return;
+      const val = Number(e.target.value) / 100;
+      state.videos[state.activeIdx].focalY = val;
+      document.getElementById('focalVal').textContent = `${e.target.value}%`;
+      updateFFmpegSnippet(state.videos[state.activeIdx]);
+      renderCanvasFrame();
+    };
+
+    document.getElementById('toggleGuidesBtn').onclick = () => {
+      state.showGuides = !state.showGuides;
+      renderCanvasFrame();
+    };
+
+    document.getElementById('playPauseBtn').onclick = () => {
+      if (hiddenVideo.paused) {
+        hiddenVideo.play();
+        document.getElementById('playPauseBtn').textContent = 'Pause';
+        requestAnimationFrame(tickPlayback);
+      } else {
+        hiddenVideo.pause();
+        document.getElementById('playPauseBtn').textContent = 'Play';
+      }
+    };
+
+    document.getElementById('seekSlider').oninput = (e) => {
+      hiddenVideo.currentTime = Number(e.target.value);
+    };
+
+    function tickPlayback() {
+      if (!hiddenVideo.paused && !hiddenVideo.ended) {
+        document.getElementById('seekSlider').value = hiddenVideo.currentTime;
+        document.getElementById('timeLabel').textContent = `${hiddenVideo.currentTime.toFixed(1)}s`;
+        renderCanvasFrame();
+        requestAnimationFrame(tickPlayback);
+      } else {
+        document.getElementById('playPauseBtn').textContent = 'Play';
+      }
+    }
+
+    function wrapLines(context, text, maxWidth) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let current = '';
+      for (const word of words) {
+        const test = current ? `${current} ${word}` : word;
+        if (context.measureText(test).width <= maxWidth) {
+          current = test;
+        } else {
+          if (current) lines.push(current);
+          current = word;
+        }
+      }
+      if (current) lines.push(current);
+      return lines;
+    }
+
+    function renderCanvasFrame() {
+      // 1. Solid white background (#FFFFFF)
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      const item = state.activeIdx >= 0 ? state.videos[state.activeIdx] : null;
+
+      // 2. Video Zone (y = 600 to 1410 -> 1080x810, no stretching)
+      if (item && hiddenVideo.readyState >= 2) {
+        const vw = hiddenVideo.videoWidth;
+        const vh = hiddenVideo.videoHeight;
+        const targetW = 1080;
+        const targetH = 810;
+        const targetRatio = targetW / targetH;
+        const srcRatio = vw / vh;
+
+        let sx = 0, sy = 0, sw = vw, sh = vh;
+        if (srcRatio < targetRatio) {
+          // Taller source: scale to 1080 wide and crop vertically around focalY
+          sh = vw / targetRatio;
+          sy = Math.max(0, Math.min(vh - sh, (vh - sh) * item.focalY));
+        } else {
+          // Wider source: scale to 810 tall and center-crop horizontally
+          sw = vh * targetRatio;
+          sx = (vw - sw) / 2;
+        }
+        ctx.drawImage(hiddenVideo, sx, sy, sw, sh, 0, 600, targetW, targetH);
+      } else {
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillRect(0, 600, 1080, 810);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '600 32px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('1080 × 810 Video Zone (y = 600 to 1410)', 540, 1015);
+      }
+
+      // 3. Caption Zone (y = 0 to 600, lower part just above y = 600, 60px side margins, max 3 lines)
+      const rawHook = item ? item.hook : 'Watching this clip and you realize how clean a white frame looks...';
+      const formattedHook = formatSentenceCase(rawHook);
+      if (formattedHook) {
+        const fontFamily = document.getElementById('fontSelect').value;
+        let fontSize = Number(document.getElementById('fontSizeSelect').value);
+        const maxWidth = 1080 - 120; // 60px left & right margins
+        let lines = [];
+
+        while (fontSize >= 38) {
+          ctx.font = `700 ${fontSize}px ${fontFamily}, sans-serif`;
+          lines = wrapLines(ctx, formattedHook, maxWidth);
+          if (lines.length <= 3) break;
+          fontSize -= 2;
+        }
+        if (lines.length > 3) {
+          lines = lines.slice(0, 3);
+          lines[2] = lines[2].replace(/\s+\S*$/, '...');
+        }
+
+        const lineHeight = fontSize * 1.3;
+        const bottomAnchorY = 562; // sits cleanly just above y = 600
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+
+        lines.forEach((line, i) => {
+          const yPos = bottomAnchorY - (lines.length - 1 - i) * lineHeight;
+          ctx.fillText(line, 60, yPos);
+        });
+      }
+
+      // 4. Logo Zone (y = 1410 to 1920, centered horizontally, 250px wide, 80px below video -> y = 1490)
+      if (state.logoImg) {
+        const logoW = 250;
+        const scale = logoW / state.logoImg.naturalWidth;
+        const logoH = state.logoImg.naturalHeight * scale;
+        const logoX = (1080 - logoW) / 2;
+        const logoY = 1410 + 80;
+        ctx.drawImage(state.logoImg, logoX, logoY, logoW, logoH);
+      } else {
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(415, 1490, 250, 90);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '600 22px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('250px Logo (y = 1490)', 540, 1542);
+      }
+
+      // Optional layout boundary guides
+      if (state.showGuides) {
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(60, 0, 960, 600);
+        ctx.strokeStyle = '#0284c7';
+        ctx.strokeRect(0, 600, 1080, 810);
+        ctx.strokeStyle = '#16a34a';
+        ctx.strokeRect(415, 1490, 250, 120);
+      }
+    }
+
+    function updateFFmpegSnippet(item) {
+      const safeText = formatSentenceCase(item.hook).replace(/'/g, "\\'");
+      const focalFactor = item.focalY.toFixed(2);
+      const cmd = `ffmpeg -i "${item.name}" -i "${state.logoName}" -filter_complex "color=white:s=1080x1920:r=30[bg];[0:v]scale=1080:-2:force_original_aspect_ratio=increase,crop=1080:810:0:(ih-810)*${focalFactor}[vid];[1:v]scale=250:-1[logo];[bg][vid]overlay=0:600[tmp1];[tmp1][logo]overlay=(W-w)/2:1490[tmp2];[tmp2]drawtext=text='${safeText}':fontcolor=black:fontsize=60:x=60:y=560-text_h:line_spacing=18[out]" -map "[out]" -map 0:a? -c:v libx264 -pix_fmt yuv420p -r 30 -c:a copy -shortest "${item.baseName}_final.mp4"`;
+      document.getElementById('ffmpegBox').textContent = cmd;
+    }
+
+    // Frame verification PNG download
+    document.getElementById('frameCheckBtn').onclick = () => {
+      if (state.activeIdx < 0) return;
+      renderCanvasFrame();
+      const link = document.createElement('a');
+      link.download = `${state.videos[state.activeIdx].baseName}_frame_check.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
+
+    // Real-time 30fps video render with original audio preserved
+    document.getElementById('exportBtn').onclick = async () => {
+      if (state.activeIdx < 0 || state.rendering) return;
+      const item = state.videos[state.activeIdx];
+      state.rendering = true;
+      const status = document.getElementById('statusBar');
+      status.textContent = `Rendering ${item.baseName}_final... keep this tab active until complete.`;
+
+      hiddenVideo.pause();
+      hiddenVideo.currentTime = 0;
+      await new Promise(r => { hiddenVideo.onseeked = r; });
+
+      const canvasStream = canvas.captureStream(30);
+      const videoStream = hiddenVideo.captureStream ? hiddenVideo.captureStream() : (hiddenVideo.mozCaptureStream ? hiddenVideo.mozCaptureStream() : null);
+      if (videoStream) {
+        videoStream.getAudioTracks().forEach(track => canvasStream.addTrack(track));
+      }
+
+      const mimeType = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')
+        ? 'video/mp4;codecs=avc1'
+        : 'video/webm;codecs=vp9,opus';
+      const ext = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+      const recorder = new MediaRecorder(canvasStream, { mimeType, videoBitsPerSecond: 8000000 });
+      const chunks = [];
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${item.baseName}_final.${ext}`;
+        a.click();
+        state.rendering = false;
+        status.textContent = `Saved ${item.baseName}_final.${ext}!`;
+      };
+
+      recorder.start();
+      hiddenVideo.play();
+
+      const drawLoop = () => {
+        if (!hiddenVideo.paused && !hiddenVideo.ended) {
+          renderCanvasFrame();
+          requestAnimationFrame(drawLoop);
+        } else {
+          renderCanvasFrame();
+          recorder.stop();
+        }
+      };
+      requestAnimationFrame(drawLoop);
+    };
+
+    renderCanvasFrame();
+  </script>
+</body>
+</html>
